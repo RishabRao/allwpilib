@@ -24,6 +24,14 @@ using namespace frc2;
 
 Command::~Command() { CommandScheduler::GetInstance().Cancel(this); }
 
+Command::Command(const Command& rhs) : ErrorBase(rhs) {}
+
+Command& Command::operator=(const Command& rhs) {
+  ErrorBase::operator=(rhs);
+  m_isGrouped = false;
+  return *this;
+}
+
 void Command::Initialize() {}
 void Command::Execute() {}
 void Command::End(bool interrupted) {}
@@ -35,7 +43,7 @@ ParallelRaceGroup Command::WithTimeout(units::second_t duration) && {
   return ParallelRaceGroup(std::move(temp));
 }
 
-ParallelRaceGroup Command::InterruptOn(std::function<bool()> condition) && {
+ParallelRaceGroup Command::WithInterrupt(std::function<bool()> condition) && {
   std::vector<std::unique_ptr<Command>> temp;
   temp.emplace_back(std::make_unique<WaitUntilCommand>(std::move(condition)));
   temp.emplace_back(std::move(*this).TransferOwnership());
@@ -50,7 +58,7 @@ SequentialCommandGroup Command::BeforeStarting(std::function<void()> toRun) && {
   return SequentialCommandGroup(std::move(temp));
 }
 
-SequentialCommandGroup Command::WhenFinished(std::function<void()> toRun) && {
+SequentialCommandGroup Command::AndThen(std::function<void()> toRun) && {
   std::vector<std::unique_ptr<Command>> temp;
   temp.emplace_back(std::move(*this).TransferOwnership());
   temp.emplace_back(std::make_unique<InstantCommand>(

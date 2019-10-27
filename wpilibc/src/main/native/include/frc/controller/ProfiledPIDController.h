@@ -13,7 +13,8 @@
 #include <units/units.h>
 
 #include "frc/controller/PIDController.h"
-#include "frc/smartdashboard/SendableBase.h"
+#include "frc/smartdashboard/Sendable.h"
+#include "frc/smartdashboard/SendableHelper.h"
 #include "frc/trajectory/TrapezoidProfile.h"
 
 namespace frc {
@@ -22,7 +23,8 @@ namespace frc {
  * Implements a PID control loop whose setpoint is constrained by a trapezoid
  * profile.
  */
-class ProfiledPIDController : public SendableBase {
+class ProfiledPIDController : public Sendable,
+                              public SendableHelper<ProfiledPIDController> {
  public:
   /**
    * Allocates a ProfiledPIDController with the given constants for Kp, Ki, and
@@ -111,12 +113,19 @@ class ProfiledPIDController : public SendableBase {
    *
    * @param goal The desired unprofiled setpoint.
    */
+  void SetGoal(TrapezoidProfile::State goal);
+
+  /**
+   * Sets the goal for the ProfiledPIDController.
+   *
+   * @param goal The desired unprofiled setpoint.
+   */
   void SetGoal(units::meter_t goal);
 
   /**
    * Gets the goal for the ProfiledPIDController.
    */
-  units::meter_t GetGoal() const;
+  TrapezoidProfile::State GetGoal() const;
 
   /**
    * Returns true if the error is within the tolerance of the error.
@@ -137,7 +146,7 @@ class ProfiledPIDController : public SendableBase {
    *
    * @return The current setpoint.
    */
-  double GetSetpoint() const;
+  TrapezoidProfile::State GetSetpoint() const;
 
   /**
    * Returns true if the error is within the tolerance of the error.
@@ -206,7 +215,7 @@ class ProfiledPIDController : public SendableBase {
    *
    * @param measurement The current measurement of the process variable.
    */
-  double Calculate(double measurement);
+  double Calculate(units::meter_t measurement);
 
   /**
    * Returns the next output of the PID controller.
@@ -214,7 +223,15 @@ class ProfiledPIDController : public SendableBase {
    * @param measurement The current measurement of the process variable.
    * @param goal The new goal of the controller.
    */
-  double Calculate(double measurement, units::meter_t goal);
+  double Calculate(units::meter_t measurement, TrapezoidProfile::State goal);
+
+  /**
+   * Returns the next output of the PID controller.
+   *
+   * @param measurement The current measurement of the process variable.
+   * @param goal The new goal of the controller.
+   */
+  double Calculate(units::meter_t measurement, units::meter_t goal);
 
   /**
    * Returns the next output of the PID controller.
@@ -223,7 +240,7 @@ class ProfiledPIDController : public SendableBase {
    * @param goal        The new goal of the controller.
    * @param constraints Velocity and acceleration constraints for goal.
    */
-  double Calculate(double measurement, units::meter_t goal,
+  double Calculate(units::meter_t measurement, units::meter_t goal,
                    frc::TrapezoidProfile::Constraints constraints);
 
   /**

@@ -12,8 +12,10 @@ import java.util.StringJoiner;
 import edu.wpi.first.hal.FRCNetComm.tInstances;
 import edu.wpi.first.hal.FRCNetComm.tResourceType;
 import edu.wpi.first.hal.HAL;
+import edu.wpi.first.wpilibj.Sendable;
 import edu.wpi.first.wpilibj.SpeedController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder;
+import edu.wpi.first.wpilibj.smartdashboard.SendableRegistry;
 import edu.wpi.first.wpiutil.math.MathUtils;
 
 /**
@@ -40,7 +42,7 @@ import edu.wpi.first.wpiutil.math.MathUtils;
  * points down. Rotations follow the right-hand rule, so clockwise rotation around the Z axis is
  * positive.
  */
-public class KilloughDrive extends RobotDriveBase {
+public class KilloughDrive extends RobotDriveBase implements Sendable, AutoCloseable {
   public static final double kDefaultLeftMotorAngle = 60.0;
   public static final double kDefaultRightMotorAngle = 120.0;
   public static final double kDefaultBackMotorAngle = 270.0;
@@ -100,11 +102,16 @@ public class KilloughDrive extends RobotDriveBase {
                               Math.sin(rightMotorAngle * (Math.PI / 180.0)));
     m_backVec = new Vector2d(Math.cos(backMotorAngle * (Math.PI / 180.0)),
                              Math.sin(backMotorAngle * (Math.PI / 180.0)));
-    addChild(m_leftMotor);
-    addChild(m_rightMotor);
-    addChild(m_backMotor);
+    SendableRegistry.addChild(this, m_leftMotor);
+    SendableRegistry.addChild(this, m_rightMotor);
+    SendableRegistry.addChild(this, m_backMotor);
     instances++;
-    setName("KilloughDrive", instances);
+    SendableRegistry.addLW(this, "KilloughDrive", instances);
+  }
+
+  @Override
+  public void close() {
+    SendableRegistry.remove(this);
   }
 
   /**
@@ -167,8 +174,8 @@ public class KilloughDrive extends RobotDriveBase {
   public void driveCartesian(double ySpeed, double xSpeed, double zRotation,
                              double gyroAngle) {
     if (!m_reported) {
-      HAL.report(tResourceType.kResourceType_RobotDrive, 3,
-                 tInstances.kRobotDrive2_KilloughCartesian);
+      HAL.report(tResourceType.kResourceType_RobotDrive,
+                 tInstances.kRobotDrive2_KilloughCartesian, 3);
       m_reported = true;
     }
 
@@ -210,8 +217,8 @@ public class KilloughDrive extends RobotDriveBase {
   @SuppressWarnings("ParameterName")
   public void drivePolar(double magnitude, double angle, double zRotation) {
     if (!m_reported) {
-      HAL.report(tResourceType.kResourceType_RobotDrive, 3,
-                 tInstances.kRobotDrive2_KilloughPolar);
+      HAL.report(tResourceType.kResourceType_RobotDrive,
+                 tInstances.kRobotDrive2_KilloughPolar, 3);
       m_reported = true;
     }
 

@@ -65,6 +65,12 @@ void CAN::WritePacketRepeating(const uint8_t* data, int length, int apiId,
   wpi_setErrorWithContext(status, HAL_GetErrorMessage(status));
 }
 
+void CAN::WriteRTRFrame(int length, int apiId) {
+  int32_t status = 0;
+  HAL_WriteCANRTRFrame(m_handle, length, apiId, &status);
+  wpi_setErrorWithContext(status, HAL_GetErrorMessage(status));
+}
+
 void CAN::StopPacketRepeating(int apiId) {
   int32_t status = 0;
   HAL_StopCANPacketRepeating(m_handle, apiId, &status);
@@ -105,23 +111,6 @@ bool CAN::ReadPacketTimeout(int apiId, int timeoutMs, CANData* data) {
   int32_t status = 0;
   HAL_ReadCANPacketTimeout(m_handle, apiId, data->data, &data->length,
                            &data->timestamp, timeoutMs, &status);
-  if (status == HAL_CAN_TIMEOUT ||
-      status == HAL_ERR_CANSessionMux_MessageNotFound) {
-    return false;
-  }
-  if (status != 0) {
-    wpi_setErrorWithContext(status, HAL_GetErrorMessage(status));
-    return false;
-  } else {
-    return true;
-  }
-}
-
-bool CAN::ReadPeriodicPacket(int apiId, int timeoutMs, int periodMs,
-                             CANData* data) {
-  int32_t status = 0;
-  HAL_ReadCANPeriodicPacket(m_handle, apiId, data->data, &data->length,
-                            &data->timestamp, timeoutMs, periodMs, &status);
   if (status == HAL_CAN_TIMEOUT ||
       status == HAL_ERR_CANSessionMux_MessageNotFound) {
     return false;

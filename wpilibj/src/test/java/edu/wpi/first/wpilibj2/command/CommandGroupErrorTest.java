@@ -41,15 +41,13 @@ class CommandGroupErrorTest extends CommandTestBase {
 
     assertThrows(IllegalArgumentException.class,
         () -> scheduler.schedule(command1));
-
-    scheduler.close();
   }
 
   @Test
   void redecoratedCommandErrorTest() {
     Command command = new InstantCommand();
 
-    assertDoesNotThrow(() -> command.withTimeout(10).interruptOn(() -> false));
+    assertDoesNotThrow(() -> command.withTimeout(10).withInterrupt(() -> false));
     assertThrows(IllegalArgumentException.class, () -> command.withTimeout(10));
     CommandGroupBase.clearGroupedCommand(command);
     assertDoesNotThrow(() -> command.withTimeout(10));

@@ -7,6 +7,11 @@
 
 #pragma once
 
+#ifdef _WIN32
+#pragma warning(push)
+#pragma warning(disable : 4521)
+#endif
+
 #include <memory>
 #include <unordered_map>
 #include <utility>
@@ -51,7 +56,7 @@ class ParallelDeadlineGroup
    */
   template <class T, class... Types,
             typename = std::enable_if_t<
-                std::is_base_of<Command, std::remove_reference_t<T>>::value>,
+                std::is_base_of_v<Command, std::remove_reference_t<T>>>,
             typename = std::enable_if_t<std::conjunction_v<
                 std::is_base_of<Command, std::remove_reference_t<Types>>...>>>
   explicit ParallelDeadlineGroup(T&& deadline, Types&&... commands) {
@@ -64,6 +69,9 @@ class ParallelDeadlineGroup
 
   // No copy constructors for command groups
   ParallelDeadlineGroup(const ParallelDeadlineGroup&) = delete;
+
+  // Prevent template expansion from emulating copy ctor
+  ParallelDeadlineGroup(ParallelDeadlineGroup&) = delete;
 
   template <class... Types,
             typename = std::enable_if_t<std::conjunction_v<
@@ -97,3 +105,7 @@ class ParallelDeadlineGroup
   bool isRunning = false;
 };
 }  // namespace frc2
+
+#ifdef _WIN32
+#pragma warning(pop)
+#endif

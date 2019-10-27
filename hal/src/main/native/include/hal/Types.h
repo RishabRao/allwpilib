@@ -49,7 +49,13 @@ typedef HAL_Handle HAL_RelayHandle;
 
 typedef HAL_Handle HAL_SolenoidHandle;
 
+typedef HAL_Handle HAL_SerialPortHandle;
+
 typedef HAL_Handle HAL_CANHandle;
+
+typedef HAL_Handle HAL_SimDeviceHandle;
+
+typedef HAL_Handle HAL_SimValueHandle;
 
 typedef HAL_CANHandle HAL_PDPHandle;
 

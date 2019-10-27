@@ -12,9 +12,11 @@ import java.util.StringJoiner;
 import edu.wpi.first.hal.FRCNetComm.tInstances;
 import edu.wpi.first.hal.FRCNetComm.tResourceType;
 import edu.wpi.first.hal.HAL;
+import edu.wpi.first.wpilibj.Sendable;
 import edu.wpi.first.wpilibj.SpeedController;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder;
+import edu.wpi.first.wpilibj.smartdashboard.SendableRegistry;
 import edu.wpi.first.wpiutil.math.MathUtils;
 
 /**
@@ -94,7 +96,7 @@ import edu.wpi.first.wpiutil.math.MathUtils;
  * {@link edu.wpi.first.wpilibj.RobotDrive#drive(double, double)} with the addition of a quick turn
  * mode. However, it is not designed to give exactly the same response.
  */
-public class DifferentialDrive extends RobotDriveBase {
+public class DifferentialDrive extends RobotDriveBase implements Sendable, AutoCloseable {
   public static final double kDefaultQuickStopThreshold = 0.2;
   public static final double kDefaultQuickStopAlpha = 0.1;
 
@@ -119,10 +121,15 @@ public class DifferentialDrive extends RobotDriveBase {
     verify(leftMotor, rightMotor);
     m_leftMotor = leftMotor;
     m_rightMotor = rightMotor;
-    addChild(m_leftMotor);
-    addChild(m_rightMotor);
+    SendableRegistry.addChild(this, m_leftMotor);
+    SendableRegistry.addChild(this, m_rightMotor);
     instances++;
-    setName("DifferentialDrive", instances);
+    SendableRegistry.addLW(this, "DifferentialDrive", instances);
+  }
+
+  @Override
+  public void close() {
+    SendableRegistry.remove(this);
   }
 
   /**
@@ -172,8 +179,8 @@ public class DifferentialDrive extends RobotDriveBase {
   @SuppressWarnings("ParameterName")
   public void arcadeDrive(double xSpeed, double zRotation, boolean squareInputs) {
     if (!m_reported) {
-      HAL.report(tResourceType.kResourceType_RobotDrive, 2,
-                 tInstances.kRobotDrive2_DifferentialArcade);
+      HAL.report(tResourceType.kResourceType_RobotDrive,
+                 tInstances.kRobotDrive2_DifferentialArcade, 2);
       m_reported = true;
     }
 
@@ -239,8 +246,8 @@ public class DifferentialDrive extends RobotDriveBase {
   @SuppressWarnings({"ParameterName", "PMD.CyclomaticComplexity"})
   public void curvatureDrive(double xSpeed, double zRotation, boolean isQuickTurn) {
     if (!m_reported) {
-      HAL.report(tResourceType.kResourceType_RobotDrive, 2,
-                 tInstances.kRobotDrive2_DifferentialCurvature);
+      HAL.report(tResourceType.kResourceType_RobotDrive,
+                 tInstances.kRobotDrive2_DifferentialCurvature, 2);
       m_reported = true;
     }
 
@@ -330,8 +337,8 @@ public class DifferentialDrive extends RobotDriveBase {
    */
   public void tankDrive(double leftSpeed, double rightSpeed, boolean squareInputs) {
     if (!m_reported) {
-      HAL.report(tResourceType.kResourceType_RobotDrive, 2,
-                 tInstances.kRobotDrive2_DifferentialTank);
+      HAL.report(tResourceType.kResourceType_RobotDrive,
+                 tInstances.kRobotDrive2_DifferentialTank, 2);
       m_reported = true;
     }
 

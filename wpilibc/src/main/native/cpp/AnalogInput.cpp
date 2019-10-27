@@ -18,6 +18,7 @@
 #include "frc/Timer.h"
 #include "frc/WPIErrors.h"
 #include "frc/smartdashboard/SendableBuilder.h"
+#include "frc/smartdashboard/SendableRegistry.h"
 
 using namespace frc;
 
@@ -42,7 +43,8 @@ AnalogInput::AnalogInput(int channel) {
   }
 
   HAL_Report(HALUsageReporting::kResourceType_AnalogChannel, channel);
-  SetName("AnalogInput", channel);
+
+  SendableRegistry::GetInstance().AddLW(this, "AnalogInput", channel);
 }
 
 AnalogInput::~AnalogInput() { HAL_FreeAnalogInputPort(m_port); }
@@ -220,6 +222,10 @@ double AnalogInput::GetSampleRate() {
 double AnalogInput::PIDGet() {
   if (StatusIsFatal()) return 0.0;
   return GetAverageVoltage();
+}
+
+void AnalogInput::SetSimDevice(HAL_SimDeviceHandle device) {
+  HAL_SetAnalogInputSimDevice(m_port, device);
 }
 
 void AnalogInput::InitSendable(SendableBuilder& builder) {

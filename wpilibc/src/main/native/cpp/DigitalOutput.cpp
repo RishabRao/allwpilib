@@ -17,6 +17,7 @@
 #include "frc/SensorUtil.h"
 #include "frc/WPIErrors.h"
 #include "frc/smartdashboard/SendableBuilder.h"
+#include "frc/smartdashboard/SendableRegistry.h"
 
 using namespace frc;
 
@@ -41,7 +42,7 @@ DigitalOutput::DigitalOutput(int channel) {
   }
 
   HAL_Report(HALUsageReporting::kResourceType_DigitalOutput, channel);
-  SetName("DigitalOutput", channel);
+  SendableRegistry::GetInstance().AddLW(this, "DigitalOutput", channel);
 }
 
 DigitalOutput::~DigitalOutput() {
@@ -137,6 +138,10 @@ void DigitalOutput::UpdateDutyCycle(double dutyCycle) {
   int32_t status = 0;
   HAL_SetDigitalPWMDutyCycle(m_pwmGenerator, dutyCycle, &status);
   wpi_setErrorWithContext(status, HAL_GetErrorMessage(status));
+}
+
+void DigitalOutput::SetSimDevice(HAL_SimDeviceHandle device) {
+  HAL_SetDIOSimDevice(m_handle, device);
 }
 
 void DigitalOutput::InitSendable(SendableBuilder& builder) {

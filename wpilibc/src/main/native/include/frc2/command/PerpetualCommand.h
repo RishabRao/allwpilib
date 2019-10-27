@@ -7,6 +7,11 @@
 
 #pragma once
 
+#ifdef _WIN32
+#pragma warning(push)
+#pragma warning(disable : 4521)
+#endif
+
 #include <memory>
 #include <utility>
 
@@ -43,8 +48,8 @@ class PerpetualCommand : public CommandHelper<CommandBase, PerpetualCommand> {
    *
    * @param command the command to run perpetually
    */
-  template <class T, typename = std::enable_if_t<std::is_base_of<
-                         Command, std::remove_reference_t<T>>::value>>
+  template <class T, typename = std::enable_if_t<std::is_base_of_v<
+                         Command, std::remove_reference_t<T>>>>
   explicit PerpetualCommand(T&& command)
       : PerpetualCommand(std::make_unique<std::remove_reference_t<T>>(
             std::forward<T>(command))) {}
@@ -53,6 +58,9 @@ class PerpetualCommand : public CommandHelper<CommandBase, PerpetualCommand> {
 
   // No copy constructors for command groups
   PerpetualCommand(const PerpetualCommand& other) = delete;
+
+  // Prevent template expansion from emulating copy ctor
+  PerpetualCommand(PerpetualCommand&) = delete;
 
   void Initialize() override;
 
@@ -64,3 +72,7 @@ class PerpetualCommand : public CommandHelper<CommandBase, PerpetualCommand> {
   std::unique_ptr<Command> m_command;
 };
 }  // namespace frc2
+
+#ifdef _WIN32
+#pragma warning(pop)
+#endif
